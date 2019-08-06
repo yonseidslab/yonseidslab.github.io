@@ -36,7 +36,7 @@ use_math: true
 > $E[(y - \hat{f}(x))^2]=  {Bias}^2 + Var + {\sigma}^2$
 
 <br>
-오차는 결국 Bias의 제곱과 Variance, $\{sigma}^2$(noise)의 합으로 표현된다(공식의 유도 과정은 [위키피디아](https://ko.wikipedia.org/wiki/%ED%8E%B8%ED%96%A5-%EB%B6%84%EC%82%B0_%ED%8A%B8%EB%A0%88%EC%9D%B4%EB%93%9C%EC%98%A4%ED%94%84)를 참고하자). 이 때 $\{sigma}^2$은 모델과는 독립이기 때문에 학습을 통해서 줄이는 것이 불가능하다. 따라서 총 오차가 일정하다면, Bias와 Variance 사이에는 일정한 trade-off가 성립하게 되는 것이다. Bias를 줄이려면 Variance가 커질 수 밖에 없고, Variance를 줄이려면 Bias가 커질 수 밖에 없다. 따라서 Bias와 Variance를 적절한 수준으로 유지하면서 총 오차를 줄이는 것이 모델 최적화의 과정이라고 할 수 있다.
+오차는 결국 Bias의 제곱과 Variance, ${\sigma}^2$(noise)의 합으로 표현된다(공식의 유도 과정은 [위키피디아](https://ko.wikipedia.org/wiki/%ED%8E%B8%ED%96%A5-%EB%B6%84%EC%82%B0_%ED%8A%B8%EB%A0%88%EC%9D%B4%EB%93%9C%EC%98%A4%ED%94%84)를 참고하자). 이 때 $\{sigma}^2$은 모델과는 독립이기 때문에 학습을 통해서 줄이는 것이 불가능하다. 따라서 총 오차가 일정하다면, Bias와 Variance 사이에는 일정한 trade-off가 성립하게 되는 것이다. Bias를 줄이려면 Variance가 커질 수 밖에 없고, Variance를 줄이려면 Bias가 커질 수 밖에 없다. 따라서 Bias와 Variance를 적절한 수준으로 유지하면서 총 오차를 줄이는 것이 모델 최적화의 과정이라고 할 수 있다.
 
 <br>
 ### 그래프로 보는 Bias-Variance

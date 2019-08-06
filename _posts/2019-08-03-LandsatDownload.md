@@ -5,13 +5,15 @@ author: "JeonghyunGan"
 categories: [Projects, HeatIsland]
 ---
 
+원래 데이터를 고르고 다운받는 과정까지 모두 R을 사용할 계획이었으나, 내 환경에서 제대로 작동하는 패키지가 없어 데이터를 준비하는 과정에서는 파이썬을 활용하기로 했다. 구글 클라우드 스토리지가 이미 랜샛 데이터를 제공하고 있어서, 이를 통해 필요한 데이터를 쿼리하고 다운로드하는 과정을 프로그램화할 예정이다. 마크다운 결과 출력이 보기 좋지 않아서 일부 결과는 생략했다. 좀 더 보기좋은 형식으로 표를 출력하는 방법을 찾으면 결과를 좀 더 추가하겠다.
+
 >
 Landsat은 인공 위성을 사용하여 지구를 지속적으로 관찰하기 위한 목적에 따라 USGS와 NASA가 공동으로 개발한 프로그램입니다. Landsat 프로그램은 지표면을 우주에서 가장 오랫동안 지속적으로 기록한 대장정으로서, 1972년 Landsat 1 위성부터 시작되었습니다. Landsat 4부터 시작하여 각 위성은 다중 스펙트럼 및 열 계측기를 사용하여 지표면을 2주에 한 번씩 30미터 해상도로 촬영했습니다. 이 컬렉션에는 Landsat 4, 5, 7, 8을 통해 얻은 전체 USGS 기록 자료가 포함되어 있습니다. 여기에는 전체 운영 기간 동안 35년에 걸쳐 400만장 이상의 고유 장면을 촬영한 데이터가 포함되어 있습니다. USGS 및 NASA의 개방 데이터 정책 덕분에 이 데이터세트는 Google Public Cloud Data 프로그램의 일부로 무료 제공됩니다. 즉, Google Cloud의 일부로 누구나 사용할 수 있습니다.
 
-Landsat 4: 1982 - 1993
-Landsat 5: 1984 - 2013
-Landsat 7: 1999 - 현재
-Landsat 8: 2013 - 현재
+- Landsat 4: 1982 - 1993
+- Landsat 5: 1984 - 2013
+- Landsat 7: 1999 - 현재
+- Landsat 8: 2013 - 현재
 
 |Tier|Description|
 |----|-----------|
@@ -21,13 +23,14 @@ Landsat 8: 2013 - 현재
 
 ## 0. 패키지 및 설정
 
+필요한 패키지들을 불러오고 구글 어플리케이션을 사용할 수 있는 계정정보를 등록한다.
+
 ```python
 from google.cloud import storage, bigquery
 import os
 import pandas as pd
-import numpy as np
+import seaborn as sns
 ```
-
 
 ```python
 # 구글 어플리케이션 계정 등록
@@ -36,11 +39,11 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f"{os.getcwd()}/dsyonsei.json"
 
 ## 1. 데이터 쿼리
 
-``google.cloud.bigquery``를 통해 필요한 데이터를 쿼리한다.
+``google.cloud.bigquery``를 통해 필요한 데이터를 쿼리한다. 조건은 다음과 같다.
 
-- WRS 116, 34
-- 운량 10% 미만
-- 6,7,8 월
+- WRS: 116, 34
+- cloud_cover: 10% 미만
+- date_acquired: 6,7,8 월
 
 
 ```python
@@ -60,711 +63,46 @@ QUERY = (
 
 # 쿼리
 query_job = bigquery_client.query(QUERY)
-```
 
-
-```python
 # 쿼리 결과를 데이터프레임으로 변환
 landsat_df = bigquery.table.RowIterator.to_dataframe(query_job.result())
-print(landsat_df.shape)
-landsat_df.head()
-```
 
-    (139, 18)
-
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>scene_id</th>
-      <th>product_id</th>
-      <th>spacecraft_id</th>
-      <th>sensor_id</th>
-      <th>date_acquired</th>
-      <th>sensing_time</th>
-      <th>collection_number</th>
-      <th>collection_category</th>
-      <th>data_type</th>
-      <th>wrs_path</th>
-      <th>wrs_row</th>
-      <th>cloud_cover</th>
-      <th>north_lat</th>
-      <th>south_lat</th>
-      <th>west_lon</th>
-      <th>east_lon</th>
-      <th>total_size</th>
-      <th>base_url</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>LM51160341984180HAJ00</td>
-      <td>None</td>
-      <td>LANDSAT_5</td>
-      <td>MSS</td>
-      <td>1984-06-28</td>
-      <td>1984-06-28T01:39:31.0760090Z</td>
-      <td>PRE</td>
-      <td>N/A</td>
-      <td>L1G</td>
-      <td>116</td>
-      <td>34</td>
-      <td>0.0</td>
-      <td>38.53812</td>
-      <td>36.39226</td>
-      <td>125.27394</td>
-      <td>128.22986</td>
-      <td>9515887</td>
-      <td>gs://gcp-public-data-landsat/LM05/PRE/116/034/...</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>LM51160341989177HAJ00</td>
-      <td>None</td>
-      <td>LANDSAT_5</td>
-      <td>MSS</td>
-      <td>1989-06-26</td>
-      <td>1989-06-26T01:39:12.0990000Z</td>
-      <td>PRE</td>
-      <td>N/A</td>
-      <td>L1G</td>
-      <td>116</td>
-      <td>34</td>
-      <td>0.0</td>
-      <td>38.56167</td>
-      <td>36.41129</td>
-      <td>125.09895</td>
-      <td>128.05886</td>
-      <td>8771784</td>
-      <td>gs://gcp-public-data-landsat/LM05/PRE/116/034/...</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>LM51160341993236HAJ00</td>
-      <td>None</td>
-      <td>LANDSAT_5</td>
-      <td>MSS</td>
-      <td>1993-08-24</td>
-      <td>1993-08-24T01:33:26.0240090Z</td>
-      <td>PRE</td>
-      <td>N/A</td>
-      <td>L1G</td>
-      <td>116</td>
-      <td>34</td>
-      <td>0.0</td>
-      <td>38.51320</td>
-      <td>36.36910</td>
-      <td>125.27728</td>
-      <td>128.22339</td>
-      <td>6735940</td>
-      <td>gs://gcp-public-data-landsat/LM05/PRE/116/034/...</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>LM21160341981239HAJ00</td>
-      <td>None</td>
-      <td>LANDSAT_2</td>
-      <td>MSS</td>
-      <td>1981-08-27</td>
-      <td>1981-08-27T00:37:44.0560070Z</td>
-      <td>PRE</td>
-      <td>N/A</td>
-      <td>L1G</td>
-      <td>116</td>
-      <td>34</td>
-      <td>0.0</td>
-      <td>38.39297</td>
-      <td>36.31878</td>
-      <td>137.87572</td>
-      <td>140.78645</td>
-      <td>7639810</td>
-      <td>gs://gcp-public-data-landsat/LM02/PRE/116/034/...</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>LM51160341988207HAJ00</td>
-      <td>None</td>
-      <td>LANDSAT_5</td>
-      <td>MSS</td>
-      <td>1988-07-25</td>
-      <td>1988-07-25T01:42:10.0530010Z</td>
-      <td>PRE</td>
-      <td>N/A</td>
-      <td>L1G</td>
-      <td>116</td>
-      <td>34</td>
-      <td>0.0</td>
-      <td>38.53115</td>
-      <td>36.38117</td>
-      <td>125.13904</td>
-      <td>128.09471</td>
-      <td>8318018</td>
-      <td>gs://gcp-public-data-landsat/LM05/PRE/116/034/...</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-
-```python
 # date_acquired를 쪼개서 year, month 컬럼 생성
 landsat_df = landsat_df.assign(year = [date.split("-")[0] for date in landsat_df['date_acquired']],
                               month = [date.split("-")[1] for date in landsat_df['date_acquired']])
+
+# 연도, 월, 컬렉션, 위성별로 데이터 개수 출력
 ```
 
+```R
+landsat = py$landsat_df
 
-```python
-landsat_df.groupby(["year", "month", "collection_category", 'spacecraft_id']).size().reset_index()
+landsat = landsat %>%
+  mutate(group = case_when(year < 1975 ~ "~1975",
+                           year < 1980 ~ "~1980",
+                           year < 1985 ~ "~1985",
+                           year < 1990 ~ "~1990",
+                           year < 1995 ~ "~1995",
+                           year < 2000 ~ "~2000",
+                           year < 2005 ~ "~2005",
+                           year < 2010 ~ "~2010",
+                           year < 2015 ~ "~2015",
+                           year < 2020 ~ "~2020"))
+
+landsat %>%
+  group_by(group) %>%
+  ggplot() +
+  geom_bar(aes(x=factor(group, ordered=T), fill=factor(group, ordered=T))) +
+  labs(x="연도(그룹)별 데이터 수")
 ```
 
+![CountByYear](/assets/article_images/CountByYear.png)
 
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>year</th>
-      <th>month</th>
-      <th>collection_category</th>
-      <th>spacecraft_id</th>
-      <th>0</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>1972</td>
-      <td>08</td>
-      <td>T2</td>
-      <td>LANDSAT_1</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>1976</td>
-      <td>07</td>
-      <td>N/A</td>
-      <td>LANDSAT_2</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>1978</td>
-      <td>07</td>
-      <td>T2</td>
-      <td>LANDSAT_3</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>1979</td>
-      <td>07</td>
-      <td>N/A</td>
-      <td>LANDSAT_3</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>1979</td>
-      <td>08</td>
-      <td>N/A</td>
-      <td>LANDSAT_2</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>1980</td>
-      <td>06</td>
-      <td>N/A</td>
-      <td>LANDSAT_3</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>1980</td>
-      <td>07</td>
-      <td>N/A</td>
-      <td>LANDSAT_3</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>1980</td>
-      <td>08</td>
-      <td>N/A</td>
-      <td>LANDSAT_2</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>1981</td>
-      <td>06</td>
-      <td>N/A</td>
-      <td>LANDSAT_2</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>1981</td>
-      <td>07</td>
-      <td>N/A</td>
-      <td>LANDSAT_2</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>1981</td>
-      <td>08</td>
-      <td>N/A</td>
-      <td>LANDSAT_2</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>11</th>
-      <td>1981</td>
-      <td>08</td>
-      <td>N/A</td>
-      <td>LANDSAT_3</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>12</th>
-      <td>1982</td>
-      <td>06</td>
-      <td>N/A</td>
-      <td>LANDSAT_3</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>13</th>
-      <td>1982</td>
-      <td>07</td>
-      <td>N/A</td>
-      <td>LANDSAT_3</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>14</th>
-      <td>1982</td>
-      <td>08</td>
-      <td>N/A</td>
-      <td>LANDSAT_3</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>15</th>
-      <td>1983</td>
-      <td>06</td>
-      <td>N/A</td>
-      <td>LANDSAT_4</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>16</th>
-      <td>1983</td>
-      <td>06</td>
-      <td>T2</td>
-      <td>LANDSAT_4</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>17</th>
-      <td>1983</td>
-      <td>08</td>
-      <td>N/A</td>
-      <td>LANDSAT_4</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>18</th>
-      <td>1983</td>
-      <td>08</td>
-      <td>T2</td>
-      <td>LANDSAT_4</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>19</th>
-      <td>1984</td>
-      <td>06</td>
-      <td>N/A</td>
-      <td>LANDSAT_4</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>20</th>
-      <td>1984</td>
-      <td>06</td>
-      <td>N/A</td>
-      <td>LANDSAT_5</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>21</th>
-      <td>1984</td>
-      <td>07</td>
-      <td>T1</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>22</th>
-      <td>1984</td>
-      <td>07</td>
-      <td>T2</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>23</th>
-      <td>1984</td>
-      <td>08</td>
-      <td>N/A</td>
-      <td>LANDSAT_4</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>24</th>
-      <td>1984</td>
-      <td>08</td>
-      <td>N/A</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>25</th>
-      <td>1985</td>
-      <td>06</td>
-      <td>N/A</td>
-      <td>LANDSAT_4</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>26</th>
-      <td>1985</td>
-      <td>06</td>
-      <td>N/A</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>27</th>
-      <td>1985</td>
-      <td>06</td>
-      <td>T2</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>28</th>
-      <td>1985</td>
-      <td>07</td>
-      <td>N/A</td>
-      <td>LANDSAT_4</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>29</th>
-      <td>1985</td>
-      <td>07</td>
-      <td>N/A</td>
-      <td>LANDSAT_5</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>82</th>
-      <td>1997</td>
-      <td>07</td>
-      <td>T2</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>83</th>
-      <td>1997</td>
-      <td>08</td>
-      <td>T2</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>84</th>
-      <td>1998</td>
-      <td>06</td>
-      <td>T2</td>
-      <td>LANDSAT_5</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>85</th>
-      <td>1998</td>
-      <td>07</td>
-      <td>T2</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>86</th>
-      <td>1998</td>
-      <td>08</td>
-      <td>T2</td>
-      <td>LANDSAT_5</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>87</th>
-      <td>1999</td>
-      <td>06</td>
-      <td>N/A</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>88</th>
-      <td>2002</td>
-      <td>06</td>
-      <td>T1</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>89</th>
-      <td>2002</td>
-      <td>06</td>
-      <td>T1</td>
-      <td>LANDSAT_7</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>90</th>
-      <td>2003</td>
-      <td>06</td>
-      <td>N/A</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>91</th>
-      <td>2003</td>
-      <td>06</td>
-      <td>T1</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>92</th>
-      <td>2004</td>
-      <td>06</td>
-      <td>N/A</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>93</th>
-      <td>2004</td>
-      <td>06</td>
-      <td>T1</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>94</th>
-      <td>2006</td>
-      <td>06</td>
-      <td>T1</td>
-      <td>LANDSAT_7</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>95</th>
-      <td>2006</td>
-      <td>08</td>
-      <td>T1</td>
-      <td>LANDSAT_7</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>96</th>
-      <td>2007</td>
-      <td>08</td>
-      <td>T1</td>
-      <td>LANDSAT_7</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>97</th>
-      <td>2009</td>
-      <td>06</td>
-      <td>T1</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>98</th>
-      <td>2010</td>
-      <td>06</td>
-      <td>N/A</td>
-      <td>LANDSAT_5</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>99</th>
-      <td>2011</td>
-      <td>06</td>
-      <td>N/A</td>
-      <td>LANDSAT_7</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>100</th>
-      <td>2011</td>
-      <td>06</td>
-      <td>T1</td>
-      <td>LANDSAT_7</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>101</th>
-      <td>2012</td>
-      <td>08</td>
-      <td>N/A</td>
-      <td>LANDSAT_7</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>102</th>
-      <td>2012</td>
-      <td>08</td>
-      <td>T1</td>
-      <td>LANDSAT_7</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>103</th>
-      <td>2015</td>
-      <td>07</td>
-      <td>N/A</td>
-      <td>LANDSAT_8</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>104</th>
-      <td>2015</td>
-      <td>07</td>
-      <td>T1</td>
-      <td>LANDSAT_8</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>105</th>
-      <td>2016</td>
-      <td>08</td>
-      <td>T1</td>
-      <td>LANDSAT_8</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>106</th>
-      <td>2017</td>
-      <td>06</td>
-      <td>T1</td>
-      <td>LANDSAT_7</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>107</th>
-      <td>2017</td>
-      <td>06</td>
-      <td>T1</td>
-      <td>LANDSAT_8</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>108</th>
-      <td>2017</td>
-      <td>08</td>
-      <td>RT</td>
-      <td>LANDSAT_8</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>109</th>
-      <td>2017</td>
-      <td>08</td>
-      <td>T1</td>
-      <td>LANDSAT_8</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>110</th>
-      <td>2018</td>
-      <td>06</td>
-      <td>T1</td>
-      <td>LANDSAT_7</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>111</th>
-      <td>2019</td>
-      <td>06</td>
-      <td>T1</td>
-      <td>LANDSAT_8</td>
-      <td>1</td>
-    </tr>
-  </tbody>
-</table>
-<p>112 rows × 5 columns</p>
-</div>
-
-
+파이썬으로 받아온 데이터를 R로 넘겨서 연도별 데이터 수를 시각화했다. 보다시피 데이터가 아주 풍부한 시기가 있는가 하면 빈곤한 시기도 있다. 데이터가 많다면 적절한 기준을 통해서 가장 퀄리티가 좋은 데이터를 뽑아내야 하고, 데이터가 없다면 대체할만한 다른 데이터를 찾거나 어쩔 수 없이 누락된 채로 두어야 한다.
 
 ## 1. 데이터 다운로드
 
-이제 걸러진 인덱스 데이터를 이용하여 실제로 위성사진을 다운로드하는 함수를 작성한다. 다운로드 함수의 개요는 다음과 같다.
+다음으로는 걸러진 인덱스 데이터를 이용하여 실제로 위성사진을 다운로드하는 함수를 작성한다. 다운로드 함수의 개요는 다음과 같다.
 
 1. 데이터에 해당하는 BaseURL의 리스트를 인자로 전달받는다.
 2. 각 행에 해당하는 데이터의 prefix를 설정한다.
@@ -772,41 +110,27 @@ landsat_df.groupby(["year", "month", "collection_category", 'spacecraft_id']).si
 
 먼저 google storage에 접근할 수 있는 클라이언트 객체를 생성하고, 랜샛 데이터가 담긴 버킷을 가져온다.
 
-
 ```python
 storage_client = storage.Client()
 bucket = storage_client.get_bucket('gcp-public-data-landsat')
 ```
 
- 다음으로 필요한 데이터의 prefix를 설정해준다. prefix에 대한 정보는 `base_url` 컬럼으로부터 가져올 수 있다. 예를 들면 다음과 같은 형태이다. 'gcp-public-data-landsat'은 버킷 이름을 가리키고, 'gcp-public-data-landsat' 이하의 문자열이 해당 데이터의 prefix가 된다.
-
+다음으로 필요한 데이터의 prefix를 설정해준다. prefix에 대한 정보는 `base_url` 컬럼으로부터 가져올 수 있다. `base_url`에서 'gcp-public-data-landsat'은 버킷 이름을 가리키고, 'gcp-public-data-landsat' 이하의 문자열이 해당 데이터의 prefix가 된다. 따라서 모든 베이스 URL에 대해서 prefix는 다음과 같은 형태로 표현할 수 있다.
 
 ```python
 landsat_df.base_url[0]
 ```
 
-
-
-
     'gs://gcp-public-data-landsat/LM05/PRE/116/034/LM51160341984180HAJ00'
-
-
-
- 따라서 모든 베이스 URL에 대해서 prefix는 다음과 같은 형태로 표현할 수 있다.
-
 
 ```python
 landsat_df.base_url[0].split("gcp-public-data-landsat/")[1]
 ```
 
-
-
-
     'LM05/PRE/116/034/LM51160341984180HAJ00'
 
 
-
-지금까지 완성된 prefix에는 지표온도를 계산하는데 필요하지 않은 밴드들 역시 포함되어 있다. 따라서 지표온도를 계산하는데 필요하지 않은 밴드들을 걸러내는 작업이 필요하다. 위성별로 지표온도 계산에 필요한 밴드는 다음과 같다. 각 위성별로 필요한 밴드를 알 수 있으므로 이에 맞게 prefix를 조정한다.
+지금까지 완성된 prefix에는 지표온도를 계산하는데 필요하지 않은 밴드들 역시 포함되어 있다. 따라서 지표온도를 계산하는데 필요하지 않은 밴드들을 걸러내는 작업이 필요하다. 위성별로 지표온도 계산에 필요한 밴드는 다음과 같다. 각 위성별로 필요한 밴드를 알 수 있으므로 이에 맞게 prefix를 조정한다. 함수 작성중.
 
 |Spacecraft|Bands required|
 |---|---|
@@ -872,9 +196,7 @@ sample.map(download_prefix)
 def download_landsat(url_list):
 
     """
-    google storage의 gcp-public-data-landsat으로부터 랜샛 데이터를 다운로드하는 함수이다.
-
-    base_url을 인자로 넣어준다.
+    url_list: python list
     """
 
     def get_prefix(url):
