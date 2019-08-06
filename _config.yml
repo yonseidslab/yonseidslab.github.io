@@ -21,6 +21,7 @@ github_username:  jhgan00
 
 # Build settings
 markdown: kramdown
+lsi: false
 theme: minima
 plugins:
   - jekyll-feed
