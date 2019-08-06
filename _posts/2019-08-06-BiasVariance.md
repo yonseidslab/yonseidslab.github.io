@@ -2,7 +2,7 @@
 layout: post
 title: "Bias-Variance Tradeoff?"
 author: "JeonghyunGan"
-categories: [Dslab, Blog]
+categories: [DataScienceLab, Blog]
 use_math: true
 ---
 
