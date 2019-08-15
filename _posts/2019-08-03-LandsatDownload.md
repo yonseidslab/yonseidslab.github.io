@@ -130,132 +130,68 @@ landsat_df.base_url[0].split("gcp-public-data-landsat/")[1]
     'LM05/PRE/116/034/LM51160341984180HAJ00'
 
 
-지금까지 완성된 prefix에는 지표온도를 계산하는데 필요하지 않은 밴드들 역시 포함되어 있다. 따라서 지표온도를 계산하는데 필요하지 않은 밴드들을 걸러내는 작업이 필요하다. 위성별로 지표온도 계산에 필요한 밴드는 다음과 같다. 각 위성별로 필요한 밴드를 알 수 있으므로 이에 맞게 prefix를 조정한다. 함수 작성중.
+지금까지 완성된 prefix에는 지표온도를 계산하는데 필요하지 않은 밴드들 역시 포함되어 있다. 따라서 지표온도를 계산하는데 필요하지 않은 밴드들을 걸러내는 작업이 필요하다. 위성별로 지표온도 계산에 필요한 밴드는 다음과 같다. 각 위성별로 필요한 밴드를 알 수 있으므로 이에 맞게 prefix를 조정한다.
 
 |Spacecraft|Bands required|
 |---|---|
-|Landsat4||
-|Landsat5||
-|Landsat7||
+|Landsat4|Band 6|
+|Landsat5|Band 6|
+|Landsat7|Band 6|
 |Landsat8|Band 4, 5, 10|
 
-
 ```python
-def get_prefix(url):
-    url = url.split("gcp-public-data-landsat/")[1]
-    ID = url.split("/")[-1]        
-    if url.split("/")[0] == "LC08":
-        return pd.Series([f"{url}/{ID}_B4.TIF", f"{url}/{ID}_B5.TIF", f"{url}/{ID}_B10.TIF"])
-    else: raise KeyError(f"{url}에 해당하는 데이터가 없습니다.")
-```
+import pandas as pd
+import os
+from google.cloud import storage, bigquery
 
+def download_landsat(index):
 
-```python
-sample = get_prefix(landsat_df.base_url[137])
-sample
-```
-
-
-
-
-    0    LC08/01/116/034/LC08_L1TP_116034_20160807_2017...
-    1    LC08/01/116/034/LC08_L1TP_116034_20160807_2017...
-    2    LC08/01/116/034/LC08_L1TP_116034_20160807_2017...
-    dtype: object
-
-
-
-
-```python
-def download_prefix(prefix):
-    directory = prefix.split('/')[-2]
-    filename = prefix.split('/')[-1]
-    if not os.path.exists(f"Downloads\\{directory}"):
-        os.mkdir(os.path.join(f"Downloads\\{directory}"))
-    blob = bucket.blob(prefix)
-    blob.download_to_filename(f"Downloads\\{directory}\\{filename}")
-```
-
-
-```python
-sample.map(download_prefix)
-```
-
-
-
-
-    0    None
-    1    None
-    2    None
-    dtype: object
-
-
-
-
-```python
-def download_landsat(url_list):
-
-    """
-    url_list: python list
-    """
-
-    def get_prefix(url):
+    '''
+    - index: pandas DataFrame(from google bigquery)
+    - download destinatinion: /Downloads/(date_acquired)/(product_id or scene_id(PRE))
+    '''
+    # 데이터별 prefix를 추출: 행별로 적용
+    def get_prefix(row):
+        # date-acquired로 디렉토리 이름 설정
+        directory = row.date_acquired.replace("-","")
+        url = row.base_url
         url = url.split("gcp-public-data-landsat/")[1]
-        ID = url.split("/")[-1]        
-
+        ID = url.split("/")[-1]
+        # 위성별로 필요한 밴드 선택
         if url.split("/")[0] == "LC08":
-            return [f"{url}/{ID}_B4.TIF", f"{url}/{ID}_B5.TIF", f"{url}/{ID}_B10.TIF"]
+            prefix = [f"{url}/{ID}_B4.TIF", f"{url}/{ID}_B5.TIF", f"{url}/{ID}_B10.TIF"]
+        elif url.split("/")[0] == "LE07":
+            prefix = [f"{url}/{ID}_B6_VCID_1.TIF"]
+        else :
+            prefix = [f"{url}/{ID}_B6.TIF"]
 
-        else: raise KeyError(f"{url}에 해당하는 데이터가 없습니다.")
+        results = [directory, prefix]
+        return results
 
-    def download_prefix(prefix_list):
-        for prefix in prefix_list:
-            blob = bucket.blob(prefix=prefix)
-            blob.download_to_filename(f"Downloads\\{}\\{prefix}")
+    # get_prefix에서 반환되는 results를 통해 데이터를 다운로드하는 함수
+    def download_prefix(results):
+        directory = results[0]
+        prefix = results[1]
+        if not os.path.exists(f"Downloads\\{directory}"):
+            os.mkdir(os.path.join(f"Downloads\\{directory}"))
+        for product in prefix:
+            filename = product.split('/')[-1]
+            blob = bucket.blob(product)
+            blob.download_to_filename(f"Downloads\\{directory}\\{filename}")
 
-
-
-
-    # 데이터를 저장할 다운로드 디렉토리 생성
-    if not os.path.exists("Downloads"): os.mkdir("Downloads")
-
-    # 스토리지 클라이언트/랜샛 버킷 객체 생성
-    storage_client = storage.Client()
-    bucket = storage_client.get_buccket('gcp-public-data-landsat')
-
-    for url in url_list:
-        prefix_list = get_prefix(url)   
-```
-
-
-```python
-
-def download_landsat(product_id, WRSpath, WRSrow):
-
-    """
-    google storage의 Landsat8 > WRS(116,34) 데이터(사진과 메타데이터)를 다운로드
-
-    WRS좌표를 세 자리 문자열로 입력
-
-    prefix 수정해서 다른 밴드 다운로드
-    """
-
+    # storage에 접근할 클라이언트 객체 생성, 버킷 객체 생성
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f"{os.getcwd()}/dsyonsei.json"
     storage_client = storage.Client()
     bucket = storage_client.get_bucket('gcp-public-data-landsat')
-    bands = ["_B4, _B5, _B10"]
+    results = index.apply(get_prefix, axis=1)
+    for result in results:
+        print(f'Downloading:{result[1]}')
+        download_prefix(result)
+        print(f'colmpleted')
 
-    for band in bands:
-        prefix=f"LC08/01/{WRSpath}/{WRSrow}/{product_id}/{product_id}{band}.TIF"
-        blobs = bucket.list_blobs(prefix=prefix)
-
-        for blob in blobs:
-            if product_id not in os.listdir():
-                os.mkdir(product_id)
-            filename = blob.name.split("/")[-1]
-            blob.download_to_filename(f"{os.getcwd()}\\{product_id}\\{filename}")
-```
-
-
-```python
+if not os.path.exists(f"Downloads"):
+    mkdir("Downloads")
+index = pd.read_csv("DownloadIndex.csv")
+download_landsat(index)
 
 ```

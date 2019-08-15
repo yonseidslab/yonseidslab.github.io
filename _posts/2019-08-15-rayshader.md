@@ -9,8 +9,7 @@ categories: [HeatIsland, Blog]
 
 ![rayshader](/assets/article_images/rayshader.gif)
 
-
-R ggmap에서 가져온 서울시 지도와 랜샛 위성사진을 활용하여 서울시의 열섬현상을 시각화한 예제이다. IoT센서를 활용하여 수집되는 정보들을 수집한다면, 자동화된 방식으로 데이터를 실시간 처리하고 시각화할 수 있다.
+**현재는 실시간으로 받아와 처리할 수 있는 도시 데이터가 존재하지 않기 때문에, R ggmap에서 가져온 서울시 지도와 랜샛 위성사진을 활용하여 서울시의 열섬현상을 시각화하였다. 도시 내 IoT센서를 통해 실시간으로 데이터를 수집하고 처리하게 된다면 입력 데이터를 10분 단위로 업데이트하는 식으로 실시간 반영 가능할 것으로 예상된다.**
 
 ### 1. 데이터 전처리
 
@@ -113,7 +112,7 @@ rm(gmapR, gmapG, gmapB, mat, vec, vec_rgb, LonLat, gmap_extent, bb)
 
 먼저 래스터 데이터를 위경도에 맞추어 투영하고, 올바른 extent를 지정해준다. 다음으로 랜샛 위성과 동일한 utm+로 다시 투영하고 서울시 경계에 맞게 잘라낸다. 처리한 데이터를 png이미지로 저장한다. 이후 png파일 크기를 1234*1012로 조정하였다.
 
-```{r}
+```r
 roadmap = png::readPNG("seoul/roadmap_resized.png")
 ```
 
