@@ -14,5 +14,3 @@ description: 데리니쟝의 블로그
 
 
 ![cat](./assets/images/home.jpg)
-
-이미지 출처: <https://www.flickr.com/photos/threecheersformcr_xo/5340309206>
