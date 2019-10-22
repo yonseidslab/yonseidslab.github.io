@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "시계열분석 기초"
+title: "데이콘 중간점검"
 author: "JeonghyunGan"
 categories: [DataScienceLab, Dacon2019, Blog]
 use_math: true
