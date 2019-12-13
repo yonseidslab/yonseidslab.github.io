@@ -1,33 +1,40 @@
 h1, h2, h3, h4, h5, h6 {
-	font-family: NanumSquare !important;
+	font-family: NanumSquare;
 }
 
 h1 {
-	font-size: 38px !important;
+	font-size: 38px;
 }
 
 h2 {
-	font-size: 30px !important;
+	font-size: 30px;
 }
 
 h3 {
-	font-size: 24px !important;
+	font-size: 24px;
 }
 
 h4 {
-	font-size: 18px !important;
+	font-size: 18px;
 }
 
 p {
 	font-family: NanumSquare;
-	font-size: 12pt !important;
+	font-size: 12pt;
 }
 
 li {
 	font-family: NanumSquare;
+	font-size: 12pt;
+	line-height: 160%;
 }
 
 code {
-	font-family: Consolas !important;
-	font-size: 12pt !important;
+	font-family: Consolas;
+	font-size: 12pt;
+}
+
+.language-plaintext {
+	background-color: #f8f8f8;
+	padding: 2px;
 }
