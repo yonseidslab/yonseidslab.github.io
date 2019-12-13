@@ -28,5 +28,6 @@ li {
 }
 
 code {
-	font-family: Consolas;
+	font-family: Consola !important;
+	font-size: 12pt !important;
 }
