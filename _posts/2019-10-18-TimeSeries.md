@@ -4,6 +4,7 @@ title: "시계열분석 기초"
 author: "JeonghyunGan"
 categories: [DataScienceLab, Dacon2019, Blog]
 use_math: true
+css: ['typo.css']
 ---
 
 데이콘 프로젝트를 진행하면서 난생 처음 시계열분석을 해야 할 일이 생겼는데, 하는 김에 정리~

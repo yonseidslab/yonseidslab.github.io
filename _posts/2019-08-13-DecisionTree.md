@@ -5,6 +5,7 @@ author: "JeonghyunGan"
 categories: [Blog]
 use_math: true
 author_profile: true
+css: ['typo.css']
 ---
 
 ## 1. Overview
