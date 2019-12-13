@@ -2,7 +2,7 @@
 layout: post
 title: "시계열분석 기초"
 author: "JeonghyunGan"
-categories: [DataScienceLab, Dacon2019, Blog]
+categories: [DataScience]
 use_math: true
 css: ['typo.css']
 ---

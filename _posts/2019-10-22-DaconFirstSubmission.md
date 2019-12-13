@@ -2,7 +2,7 @@
 layout: post
 title: "데이콘 중간점검"
 author: "JeonghyunGan"
-categories: [DataScienceLab, Dacon2019, Blog]
+categories: [Projects]
 use_math: true
 css: ['typo.css']
 ---

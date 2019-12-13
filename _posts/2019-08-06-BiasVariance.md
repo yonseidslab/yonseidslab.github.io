@@ -2,7 +2,7 @@
 layout: post
 title: "Bias-Variance Tradeoff?"
 author: "JeonghyunGan"
-categories: [DataScienceLab, Blog]
+categories: [DataScience]
 css: ['typo.css']
 use_math: true
 ---

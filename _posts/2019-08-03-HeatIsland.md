@@ -2,7 +2,7 @@
 layout: post
 title: "프로젝트 계획서"
 author: "JeonghyunGan"
-categories: [Projects, HeatIsland]
+categories: [Projects]
 css: ['typo.css']
 author_profile: true
 ---

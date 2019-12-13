@@ -2,7 +2,7 @@
 layout: post
 title: "도시 데이터 시각화 샘플"
 author: "JeonghyunGan"
-categories: [HeatIsland, Blog]
+categories: [Projects]
 css: ['typo.css']
 ---
 

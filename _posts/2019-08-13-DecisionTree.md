@@ -2,7 +2,7 @@
 layout: post
 title: "DecisionTree"
 author: "JeonghyunGan"
-categories: [Blog]
+categories: [DataScience]
 use_math: true
 author_profile: true
 css: ['typo.css']

@@ -2,7 +2,7 @@
 layout: post
 title: "Landsat 데이터 다운로드"
 author: "JeonghyunGan"
-categories: [Projects, HeatIsland]
+categories: [Projects]
 css: ['typo.css']
 ---
 
