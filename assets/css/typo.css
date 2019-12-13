@@ -1,24 +1,24 @@
 h1, h2, h3, h4, h5, h6 {
-	font-family: NanumSquare;
+	font-family: NanumSquare !important;
 }
 
 h1 {
-	font-size: 38px;
+	font-size: 38px !important;
 }
 
 h2 {
-	font-size: 30px;
+	font-size: 30px !important;
 }
 
 h3 {
-	font-size: 24px;
+	font-size: 24px !important;
 }
 
 h4 {
-	font-size: 18px;
+	font-size: 18px !important;
 }
 
 p {
 	font-family: NanumSquare;
-	font-size: 11pt;
+	font-size: 11pt !important;
 }
