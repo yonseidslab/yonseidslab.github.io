@@ -22,3 +22,11 @@ p {
 	font-family: NanumSquare;
 	font-size: 12pt !important;
 }
+
+li {
+	font-family: NanumSquare;
+}
+
+code {
+	font-family: Consolas;
+}
